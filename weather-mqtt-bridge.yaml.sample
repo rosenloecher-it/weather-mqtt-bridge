@@ -1,0 +1,22 @@
+logging:
+    # "-p" (== --print) makes logging obsolet (espcically if you running a systemd service)
+    # log_file:                 "./__test__/mqtt-logs.log"
+    log_level:                  "info"  # debug, info, warning, error
+
+mqtt:
+    client_id:                  "weather-mqtt-bridge"
+    host:                       "<server>"
+    port:                       1883
+    protocol:                   4  # 3==MQTTv31 (default), 4==MQTTv311, 5==default/MQTTv5,
+
+fetcher:
+    url:                        http://<weather-station-url.or-ip>/livedata.htm
+    altitude:                   255  # in meters
+
+runner:
+    refresh_time:              45
+    payload_mqtt_topic:         "test/weather/payload"
+    payload_mqtt_last_will:     '{"status": "offline"}'
+    service_mqtt_topic:         "test/weather/service"
+    service_mqtt_running:       "ON"
+    service_mqtt_stopped:       "OFF"
