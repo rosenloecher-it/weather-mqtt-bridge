@@ -31,7 +31,7 @@ MQTT_JSONSCHEMA = {
         MqttConfKey.USER: {"type": "string", "minLength": 1},
         MqttConfKey.PASSWORD: {"type": "string"},
         MqttConfKey.QOS: {"type": "integer", "enum": [0, 1, 2]},
-        MqttConfKey.RETAIN: {"type": "boolean"},
+        MqttConfKey.RETAIN: {"type": "boolean", "description": "Default: True"},
 
     },
     "additionalProperties": False,

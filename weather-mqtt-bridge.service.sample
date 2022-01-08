@@ -1,5 +1,5 @@
 [Unit]
-Description=MQTT Postgres Logger
+Description=Weather MQTT Bridge
 After=syslog.target network.target
 # consider to add "docker.service" too if your database or mqtt broker runs within a local docker container
 # Requires=docker.service
@@ -9,7 +9,7 @@ After=syslog.target network.target
 Type=simple
 ExecStart=/opt/weather-mqtt-bridge/weather-mqtt-bridge.sh --systemd-mode --config-file /opt/weather-mqtt-bridge/weather-mqtt-bridge.yaml
 Restart=always
-RestartSec=15
+RestartSec=45
 WorkingDirectory=/opt/weather-mqtt-bridge
 User=<your service user>
 
