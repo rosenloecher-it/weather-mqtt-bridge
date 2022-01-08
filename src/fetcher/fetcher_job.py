@@ -1,17 +1,16 @@
 import abc
 import copy
-import datetime
 import logging
 import urllib
 from typing import Dict, List
 
 from bs4 import BeautifulSoup
-from tzlocal import get_localzone
 
 from src.fetcher.fetcher_config import FetcherConfKey
 from src.fetcher.fetcher_item import FetcherItem
 from src.fetcher.fetcher_result import FetcherResult, FetcherStatus
 from src.fetcher.time_series_manager import TimeSeriesManager
+
 
 _logger = logging.getLogger(__name__)
 
@@ -125,7 +124,3 @@ class FetcherJob:
             results[item.result_key] = value
 
         return results
-
-    @classmethod
-    def _now(cls) -> datetime.datetime:
-        return datetime.datetime.now(tz=get_localzone())

@@ -24,14 +24,12 @@ class FroggitWh2600Job(FetcherJob):
             key = str(key)
             fetcher_items.append(FetcherItem(key, html_key, transform_class(key)))
 
-        # add_standard("CurrTime", FetcherKey.TIMESTAMP, transformation.Time2StringTransformation)
-
         # Receiver Time: "14:04 8/25/2019"
         result_key = FetcherKey.TIMESTAMP
         item = FetcherItem(
             result_key,
             "CurrTime",
-            transformation.TimeStringTransformationChecker(result_key, cls.OUTDATED_TIME_IN_SECONDS, external_time_func=cls._now)
+            transformation.TimeStringTransformationChecker(result_key, cls.OUTDATED_TIME_IN_SECONDS)
         )
         fetcher_items.append(item)
 

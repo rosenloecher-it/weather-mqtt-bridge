@@ -1,7 +1,6 @@
 import datetime
 import unittest
-
-from tzlocal import get_localzone
+from unittest import mock
 
 from src.fetcher.fetcher_key import FetcherKey
 from src.fetcher.fetcher_result import FetcherStatus
@@ -17,17 +16,12 @@ class _MockedFetcherJob(FroggitWh2600Job):
     def _load_page(self) -> str:
         return SetupTest.load_froggit_mocked_html()
 
-    @classmethod
-    def _now(cls) -> datetime.datetime:
-        if cls.mock_time:
-            return cls.mock_time
-        else:
-            return datetime.datetime.now(tz=get_localzone())
-
 
 class TestFroggitWh2600Job(unittest.TestCase):
 
-    def test_standard(self):
+    @mock.patch('src.time_utils.TimeUtils.now')
+    def test_standard(self, mocked_now):
+        # def test_standard(self):
         time_series_manager = TimeSeriesManager()
 
         config = {
@@ -36,7 +30,12 @@ class TestFroggitWh2600Job(unittest.TestCase):
         }
 
         fetcher = _MockedFetcherJob(config, time_series_manager)
-        _MockedFetcherJob.mock_time = SetupTest.get_froggit_test_time()
+
+        froggit_test_time = SetupTest.get_froggit_test_time()
+        froggit_test_time = froggit_test_time.replace(tzinfo=datetime.timezone(datetime.timedelta(hours=2)))
+
+        mocked_now.return_value = froggit_test_time
+
         test_result = fetcher.fetch()
 
         self.assertEqual(test_result.status, FetcherStatus.SUCCESS)
@@ -53,7 +52,7 @@ class TestFroggitWh2600Job(unittest.TestCase):
             FetcherKey.SOLAR_RADIATION: 637.87,
             FetcherKey.TEMP_INSIDE: 24.0,
             FetcherKey.TEMP_OUTSIDE: 31.3,
-            FetcherKey.TIMESTAMP: "2019-08-25T14:04:00",
+            FetcherKey.TIMESTAMP: "2019-08-25T14:04:00+02:00",
             FetcherKey.UV: 1773.0,
             FetcherKey.UVI: 4.0,
             FetcherKey.WIND_DIRECTION: 121.0,

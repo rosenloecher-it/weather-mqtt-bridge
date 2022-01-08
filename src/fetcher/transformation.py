@@ -68,46 +68,52 @@ class TimeTransformation(SingleTransformation):  # noqa
         self._time_format = time_format
 
 
-class Time2StringTransformation(TimeTransformation):
-
-    DEFAULT_TIME_FORMAT = '%H:%M %m/%d/%Y'  # '14:04 8/25/2019'
-
-    def __init__(self, value_key, time_format=DEFAULT_TIME_FORMAT):
-        super().__init__(value_key, time_format)
-
-    def transform(self, raw_values: Dict[str, str]) -> datetime.datetime:
-        raw_value = raw_values.get(self._value_key)
-        value = datetime.datetime.strptime(raw_value, self._time_format)
-        return value.isoformat()
+# # not needed at moment
+# class Time2StringTransformation(TimeTransformation):
+#
+#     DEFAULT_TIME_FORMAT = '%H:%M %m/%d/%Y'  # '14:04 8/25/2019'
+#
+#     def __init__(self, value_key, time_format=DEFAULT_TIME_FORMAT):
+#         super().__init__(value_key, time_format)
+#
+#     def transform(self, raw_values: Dict[str, str]) -> datetime.datetime:
+#         raw_value = raw_values.get(self._value_key)
+#         value = datetime.datetime.strptime(raw_value, self._time_format)
+#         return value.isoformat()
 
 
 class TimeStringTransformationChecker(TimeTransformation):
+    """
+    1. Transforms a string to a datetime. ATTENTION: adds the local timezone if there is none!
+    2. Checks if the delivered datetime is older than `outdate_sec`
+    """
 
-    def __init__(self, value_key, outdate_sec, external_time_func=None, time_format=TimeTransformation.DEFAULT_TIME_FORMAT):
+    def __init__(self, value_key, outdate_sec, time_format=TimeTransformation.DEFAULT_TIME_FORMAT):
         super().__init__(value_key, time_format)
         self._outdate_sec = outdate_sec
-        self._external_time_func = external_time_func
 
     def transform(self, raw_values: Dict[str, str]) -> datetime.datetime:
         raw_value = raw_values.get(self._value_key)
         value = datetime.datetime.strptime(raw_value, self._time_format)
 
+        now = TimeUtils.now()
+
+        if value.tzinfo is None:
+            # WORKAROUND not nice, but manageable as long there is only the Froggit WH2660 weather station.
+            value = value.replace(tzinfo=now.tzinfo)
+
         if self._outdate_sec is not None:
-            self._check_delivery_time(value)
+            self._check_delivery_time(value, now)
 
         return value.isoformat()
 
-    def _check_delivery_time(self, delivery_time):
+    def _check_delivery_time(self, delivery_time, now):
         title = 'delivery time check failed -'
-        current_time = self._external_time_func() if self._external_time_func else TimeUtils.now()
 
         if not isinstance(delivery_time, datetime.datetime):
             raise ValueError('{} wrong time format ({})!'.format(title, type(delivery_time)))
 
-        if delivery_time.tzinfo is None:
-            delivery_time = delivery_time.replace(tzinfo=current_time.tzinfo)
-
-        time_delta_seconds = (current_time - delivery_time).total_seconds()
+        time_delta_seconds = (now - delivery_time).total_seconds()
         if time_delta_seconds > self._outdate_sec:
             raise ValueError('{0} outdated ({1:.0f}s)!'.format(title, time_delta_seconds))
 

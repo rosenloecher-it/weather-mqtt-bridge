@@ -2,6 +2,8 @@ import datetime
 import unittest
 from unittest import mock
 
+from tzlocal import get_localzone
+
 from src.fetcher.transformation import RelPressureTransformation, GustTransformation, TimeStringTransformationChecker
 
 
@@ -42,29 +44,30 @@ class TestGustTransformation(unittest.TestCase):
 
 class TestTimeStringTransformationChecker(unittest.TestCase):
 
-    # @mock.patch.object(TimeStringTransformationChecker, "_now", MagicMock())
+    @classmethod
+    def get_timezones(cls):
+        utc = datetime.datetime.utcnow()
+        tz1 = datetime.timezone(datetime.timedelta(hours=2))
+        return [None, get_localzone(), utc.tzinfo, tz1]
 
     @mock.patch('src.time_utils.TimeUtils.now')
     def test_success(self, mocked_now):
-        # default time format: '14:04 8/25/2019'
-        mocked_now.return_value = datetime.datetime(2019, 8, 25, 14, 5, 0)
+        for tzinfo in self.get_timezones():
+            # default time format: '14:04 8/25/2019'
+            mocked_now.return_value = datetime.datetime(2019, 8, 25, 14, 5, 0, tzinfo=tzinfo)
+            time_page_created = datetime.datetime(2019, 8, 25, 14, 3, 0, tzinfo=tzinfo)
+            transformation = TimeStringTransformationChecker("result_key", 120)
 
-        time_page_created = datetime.datetime(2019, 8, 25, 14, 3, 0)
-
-        transformation = TimeStringTransformationChecker("result_key", 120)
-
-        out = transformation.transform({"result_key": "14:03 8/25/2019"})
-
-        self.assertEqual(out, time_page_created.isoformat())
+            out = transformation.transform({"result_key": "14:03 8/25/2019"})
+            self.assertEqual(out, time_page_created.isoformat())
 
     @mock.patch('src.time_utils.TimeUtils.now')
     def test_failure(self, mocked_now):
-        # default time format: '14:04 8/25/2019'
-        mocked_now.return_value = datetime.datetime(2019, 8, 25, 14, 5, 0)
+        for tzinfo in self.get_timezones():
+            # default time format: '14:04 8/25/2019'
+            mocked_now.return_value = datetime.datetime(2019, 8, 25, 14, 5, 0, tzinfo=tzinfo)
+            transformation = TimeStringTransformationChecker("result_key", 120)
 
-        transformation = TimeStringTransformationChecker("result_key", 120)
-
-        with self.assertRaises(ValueError) as ex:
-            transformation.transform({"result_key": "14:02 8/25/2019"})
-
-        self.assertTrue("outdated" in str(ex.exception))
+            with self.assertRaises(ValueError) as ex:
+                transformation.transform({"result_key": "14:02 8/25/2019"})
+            self.assertTrue("outdated" in str(ex.exception))
