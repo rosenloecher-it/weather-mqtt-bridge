@@ -80,10 +80,10 @@ def run_service(config_file, log_file, log_level, print_logs, systemd_mode):
         _logger.debug("start")
 
         runner_config = app_config.get_runner_config()
-        fetcher_factoy = FetcherFactory(app_config.get_fetcher_config())
+        fetcher_factory = FetcherFactory(app_config.get_fetcher_config())
         mqtt_client = MqttClient(app_config.get_mqtt_config())
 
-        runner = Runner(runner_config, fetcher_factoy, mqtt_client)
+        runner = Runner(runner_config, fetcher_factory, mqtt_client)
         runner.run()
 
     finally:
