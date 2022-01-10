@@ -98,7 +98,7 @@ class TestIntegration(unittest.TestCase):
         time_result = datetime.datetime(2022, 1, 8, 10, 0, 2)
 
         fetcher_values = {"marker": 1234, FetcherKey.TIMESTAMP: time_fetch.isoformat()}
-        fetcher_result = FetcherResult(status=FetcherStatus.SUCCESS, values=fetcher_values)
+        fetcher_result = FetcherResult(status=FetcherStatus.OK, values=fetcher_values)
 
         self.mqtt_client.is_connected.return_value = True
         self.fetcher_job.fetch_safe.return_value = fetcher_result

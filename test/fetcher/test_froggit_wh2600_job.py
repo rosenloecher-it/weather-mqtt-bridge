@@ -38,7 +38,7 @@ class TestFroggitWh2600Job(unittest.TestCase):
 
         test_result = fetcher.fetch()
 
-        self.assertEqual(test_result.status, FetcherStatus.SUCCESS)
+        self.assertEqual(test_result.status, FetcherStatus.OK)
 
         expected_values = {
             FetcherKey.BATTERY_INSIDE: 'Normal',

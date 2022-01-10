@@ -54,7 +54,7 @@ class FetcherJob:
         values_transformed = self._transform_values(items, values_raw)
         values_over_time = self._calculated_timed_values(items, values_transformed)
 
-        result = FetcherResult(FetcherStatus.SUCCESS, values_over_time)
+        result = FetcherResult(FetcherStatus.OK, values_over_time)
         return result
 
     def _load_page(self) -> str:

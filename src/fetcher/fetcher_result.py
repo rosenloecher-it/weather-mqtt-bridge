@@ -2,7 +2,7 @@ from collections import namedtuple
 
 
 class FetcherStatus:
-    SUCCESS = "success"
+    OK = "ok"
     TIMEOUT = "timeout"
     ERROR = "error"
 

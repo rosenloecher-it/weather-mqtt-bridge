@@ -150,6 +150,7 @@ class Runner:
 
         fetcher_status = fetcher_result.status or FetcherStatus.ERROR
         fetcher_values = fetcher_result.values or {}
+
         fetcher_values[FetcherKey.STATUS] = fetcher_status
         if not fetcher_values.get(FetcherKey.TIMESTAMP):
             fetcher_values[FetcherKey.TIMESTAMP] = TimeUtils.now().isoformat()
@@ -167,10 +168,10 @@ class Runner:
             else:
                 raise
 
-        if fetcher_status == FetcherStatus.SUCCESS and not sent_message_failure:
+        if fetcher_status == FetcherStatus.OK and not sent_message_failure:
             self._resilience_reference_time = TimeUtils.now()
 
-        if fetcher_status != FetcherStatus.SUCCESS:
+        if fetcher_status != FetcherStatus.OK:
             if within_resilience_period:
                 _logger.warning("fetcher error (%s) within resilience period!", str(fetcher_result.status))
             else:
