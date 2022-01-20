@@ -1,8 +1,8 @@
 # weather-mqtt-bridge (Froggit WH2600)
 
-Collects provided information of a Froggit WH2600 weather station (website) and push it to [MQTT](https://en.wikipedia.org/wiki/MQTT).
+Collects provided information of a Froggit WH2600 weather station (local website) and push it to [MQTT](https://en.wikipedia.org/wiki/MQTT).
 
-[MQTT](https://en.wikipedia.org/wiki/MQTT) is widely supported by the most smarthome systems. 
+[MQTT](https://en.wikipedia.org/wiki/MQTT) is widely supported by the most smarthome systems.
 
 Features:
 - Command line utils or runs as Linux service.
@@ -10,10 +10,10 @@ Features:
     ```json
     {"battery-inside": "Normal", "battery-outside": "Normal", "humi-inside": 48.0, "humi-outside": 94.0, "pressure-abs": 980.3, "pressure-rel": 1011.8, "rain-counter": 0.3, "rain-hourly": 0.0, "solar-radiation": 64.01, "status": "success", "temp-inside": 22.1, "temp-outside": 1.2, "timestamp": "2022-01-08T10:56:00", "uv": 251.0, "uvi": 1.0, "wind-direction": 223.0, "wind-gust": 0.0, "wind-speed": 0.0}
     ```
-- Calculates relative barometric pressure (strange results with the provided calculation) 
+- Calculates relative barometric pressure (strange results with the provided calculation)
 - An additional MQTT channel for service status may be configured, which shows if the service is running or not.
-  There were issues, that the weather station did not respond after some time and had to be restarted. 
-  With that service channel an smarthome socket coult be controlled. But a digital timer switch socket could be the trick too. 
+  There were issues, that the weather station did not respond after some time and had to be restarted.
+  With that service channel an smarthome socket coult be controlled. But a digital timer switch socket could be the trick too.
 
 ## Startup
 
@@ -56,7 +56,7 @@ Edit your `weather-mqtt-bridge.yaml`. See comments there.
 ./weather-mqtt-bridge.sh --help
 
 # prepare your own config file based on ./weather-mqtt-bridge.yaml.sample
-# the embedded json schema may contain additional information 
+# the embedded json schema may contain additional information
 ./weather-mqtt-bridge.sh --json-schema
 
 # start the logger
