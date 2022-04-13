@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import json
 import logging
 import signal
 import threading
@@ -12,6 +11,7 @@ from src.fetcher.fetcher_key import FetcherKey
 from src.fetcher.fetcher_result import FetcherStatus, FetcherResult
 from src.mqtt_client import MqttException
 from src.runner_config import RunnerConfKey
+from src.utils.json_utils import JsonUtils
 from src.utils.time_utils import TimeUtils
 
 _logger = logging.getLogger(__name__)
@@ -157,7 +157,7 @@ class Runner:
         if not fetcher_values.get(FetcherKey.TIMESTAMP):
             fetcher_values[FetcherKey.TIMESTAMP] = TimeUtils.now().isoformat()
 
-        message = json.dumps(fetcher_values, sort_keys=True)
+        message = JsonUtils.dumps(fetcher_values)
         within_resilience_period = (TimeUtils.now() - self._resilience_reference_time).total_seconds() <= self._resilience_time
 
         sent_message_failure = False
