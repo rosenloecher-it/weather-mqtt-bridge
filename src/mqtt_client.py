@@ -1,6 +1,5 @@
 import datetime
 import logging
-import random
 import threading
 from typing import Optional
 
@@ -35,7 +34,7 @@ class MqttClient:
 
         self._client = None
         self._is_connected = False
-        self._disconnected_error_info = None  # type: Optional[str]
+        self._connection_error_info = None  # type: Optional[str]
         self._subscribed = False
         self._shutdown = False
 
@@ -49,7 +48,7 @@ class MqttClient:
         self._retain = config.get(MqttConfKey.RETAIN, True)
 
         protocol = config.get(MqttConfKey.PROTOCOL, self.DEFAULT_PROTOCOL)
-        client_id = config.get(MqttConfKey.CLIENT_ID, self._get_default_client_id())
+        client_id = config.get(MqttConfKey.CLIENT_ID)
         ssl_ca_certs = config.get(MqttConfKey.SSL_CA_CERTS)
         ssl_certfile = config.get(MqttConfKey.SSL_CERTFILE)
         ssl_keyfile = config.get(MqttConfKey.SSL_KEYFILE)
@@ -97,7 +96,19 @@ class MqttClient:
             self._client = None
             _logger.debug("%s was closed.", self.__class__.__name__)
 
-    # def last_will(self):self, payload: str):
+    def ensure_connection(self):
+        """
+        Check for rarely unexpected disconnects, but when happens, it's not clear how to heal. At least the loop has to be restarted.
+        Best to restart the whole app. Recognise a stopped service in system log.
+        """
+        with self._lock:
+            is_connected = self._is_connected
+            connection_error_info = self._connection_error_info
+
+        if connection_error_info:
+            raise MqttException(connection_error_info)  # leads to exit => restarted by systemd
+        if not is_connected:
+            raise MqttException("MQTT is not connected!")
 
     def set_last_will(self, topic: str, last_will: str):
         if self.is_connected():
@@ -114,9 +125,6 @@ class MqttClient:
         if self._shutdown:
             return
 
-        if not self.is_connected():
-            raise MqttException(self._disconnected_error_info or "MQTT is not connected!")
-
         result = self._client.publish(
             topic=topic,
             payload=payload,
@@ -124,39 +132,40 @@ class MqttClient:
             retain=self._retain
         )
 
-        _logger.info("sent - topic: '%s' | payload: '%s'", topic, payload)
+        _logger.debug("sent - topic: '%s' | payload: '%s'", topic, payload)
 
         return result
 
-    # noinspection PyMethodMayBeStatic
-    def _get_default_client_id(self):
-        return f"froggit-mqtt-{random.randint(1, 9999999999)}"
-
     def _on_connect(self, _mqtt_client, _userdata, _flags, rc):
         """MQTT callback is called when client connects to MQTT server."""
+        class_name = self.__class__.__name__
         if rc == 0:
             with self._lock:
                 self._is_connected = True
-            _logger.debug("%s was connected.", self.__class__.__name__)
+            _logger.debug("%s was connected.", class_name)
         else:
-            _logger.error("%s failed to connect: %s (#%s)", self.__class__.__name__, mqtt.error_string(rc), rc)
+            connection_error_info = f"{class_name} connection failed (#{rc}: {mqtt.error_string(rc)})!"
+            _logger.error(connection_error_info)
+            with self._lock:
+                self._is_connected = False
+                self._connection_error_info = connection_error_info
 
     def _on_disconnect(self, _mqtt_client, _userdata, rc):
         """MQTT callback for when the client disconnects from the MQTT server."""
-
-        disconnected_error_info = None
+        class_name = self.__class__.__name__
+        connection_error_info = None
         if rc != 0:
-            disconnected_error_info = "{} (#{})".format(mqtt.error_string(rc), rc)
+            connection_error_info = f"{class_name} connection was lost (#{rc}: {mqtt.error_string(rc)}) => abort => restart!"
 
         with self._lock:
             self._is_connected = False
-            if rc != 0:
-                self._disconnected_error_info = disconnected_error_info
+            if connection_error_info and not self._connection_error_info:
+                self._connection_error_info = connection_error_info
 
         if rc == 0:
-            _logger.debug("%s was disconnected.", self.__class__.__name__)
+            _logger.debug("%s was disconnected.", class_name)
         else:
-            _logger.error("%s was unexpectedly disconnected: %s", self.__class__.__name__, disconnected_error_info or "???")
+            _logger.error("%s was unexpectedly disconnected: %s", class_name, connection_error_info or "???")
 
     def _on_message(self, mqtt_client, userdata, mqtt_message: mqtt.MQTTMessage):
         """MQTT callback when a message is received from MQTT server"""

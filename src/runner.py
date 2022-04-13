@@ -103,6 +103,8 @@ class Runner:
 
             if TimeUtils.now() >= self._next_fetch_trigger:
                 self._start_fetcher_task()
+            else:
+                self._mqtt_client.ensure_connection()
 
             await asyncio.sleep(0.1)
 
