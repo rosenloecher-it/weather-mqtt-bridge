@@ -13,7 +13,7 @@ Features:
 - Calculates relative barometric pressure (strange results with the provided calculation)
 - An additional MQTT channel for service status may be configured, which shows if the service is running or not.
   There were issues, that the weather station did not respond after some time and had to be restarted.
-  With that service channel an smarthome socket coult be controlled. But a digital timer switch socket could be the trick too.
+  With that service channel a smarthome socket could be controlled. But a digital timer switch socket could be the trick too.
 
 ## Startup
 
@@ -70,7 +70,7 @@ Edit your `weather-mqtt-bridge.yaml`. See comments there.
 # prepare your own service script based on weather-mqtt-bridge.service.sample
 cp ./weather-mqtt-bridge.service.sample ./weather-mqtt-bridge.service
 
-# edit/adapt pathes and user in weather-mqtt-bridge.service
+# edit/adapt paths and user in weather-mqtt-bridge.service
 vi ./weather-mqtt-bridge.service
 
 # install service
@@ -98,7 +98,7 @@ If no messages get logged check your broker.
 ```bash
 sudo apt-get install mosquitto-clients
 
-# preprare credentials
+# prepare credentials
 SERVER="<your server>"
 
 # start listener

@@ -1,7 +1,8 @@
 import abc
 import copy
 import logging
-import urllib
+import urllib.error
+import urllib.request
 from typing import Dict, List
 
 from bs4 import BeautifulSoup
@@ -10,7 +11,6 @@ from src.fetcher.fetcher_config import FetcherConfKey
 from src.fetcher.fetcher_item import FetcherItem
 from src.fetcher.fetcher_result import FetcherResult, FetcherStatus
 from src.fetcher.time_series_manager import TimeSeriesManager
-
 
 _logger = logging.getLogger(__name__)
 
