@@ -7,7 +7,7 @@ from src.fetcher.time_series import MaxTimeSeries
 
 class TestMaxTimeSeries(unittest.TestCase):
 
-    @mock.patch('src.time_utils.TimeUtils.now')
+    @mock.patch('src.utils.time_utils.TimeUtils.now')
     def test_standard(self, mocked_now):
 
         c = MaxTimeSeries("dummy", timedelta(seconds=20))

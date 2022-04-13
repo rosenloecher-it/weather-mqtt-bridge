@@ -92,7 +92,7 @@ class TestIntegration(unittest.TestCase):
         with self.assertRaises(asyncio.exceptions.TimeoutError):
             runner.run_wait_for_mqtt_connection_timeout(0.3)
 
-    @mock.patch('src.time_utils.TimeUtils.now')
+    @mock.patch('src.utils.time_utils.TimeUtils.now')
     def test_fetch(self, runner_now):
         time_fetch = datetime.datetime(2022, 1, 8, 10, 0, 0)
         time_result = datetime.datetime(2022, 1, 8, 10, 0, 2)
@@ -128,7 +128,7 @@ class TestIntegration(unittest.TestCase):
         ]
         self.mqtt_client.publish.assert_has_calls(publish_calls, any_order=True)
 
-    @mock.patch('src.time_utils.TimeUtils.now')
+    @mock.patch('src.utils.time_utils.TimeUtils.now')
     def test_fetch_timeout(self, mocked_now):
 
         time_fetch = datetime.datetime(2022, 1, 8, 10, 0, 0)

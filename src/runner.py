@@ -12,7 +12,7 @@ from src.fetcher.fetcher_key import FetcherKey
 from src.fetcher.fetcher_result import FetcherStatus, FetcherResult
 from src.mqtt_client import MqttException
 from src.runner_config import RunnerConfKey
-from src.time_utils import TimeUtils
+from src.utils.time_utils import TimeUtils
 
 _logger = logging.getLogger(__name__)
 

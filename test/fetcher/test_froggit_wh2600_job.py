@@ -19,7 +19,7 @@ class _MockedFetcherJob(FroggitWh2600Job):
 
 class TestFroggitWh2600Job(unittest.TestCase):
 
-    @mock.patch('src.time_utils.TimeUtils.now')
+    @mock.patch('src.utils.time_utils.TimeUtils.now')
     def test_standard(self, mocked_now):
         # def test_standard(self):
         time_series_manager = TimeSeriesManager()

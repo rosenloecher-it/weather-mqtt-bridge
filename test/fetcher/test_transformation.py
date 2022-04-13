@@ -50,7 +50,7 @@ class TestTimeStringTransformationChecker(unittest.TestCase):
         tz1 = datetime.timezone(datetime.timedelta(hours=2))
         return [None, get_localzone(), utc.tzinfo, tz1]
 
-    @mock.patch('src.time_utils.TimeUtils.now')
+    @mock.patch('src.utils.time_utils.TimeUtils.now')
     def test_success(self, mocked_now):
         for tzinfo in self.get_timezones():
             # default time format: '14:04 8/25/2019'
@@ -61,7 +61,7 @@ class TestTimeStringTransformationChecker(unittest.TestCase):
             out = transformation.transform({"result_key": "14:03 8/25/2019"})
             self.assertEqual(out, time_page_created.isoformat())
 
-    @mock.patch('src.time_utils.TimeUtils.now')
+    @mock.patch('src.utils.time_utils.TimeUtils.now')
     def test_failure(self, mocked_now):
         for tzinfo in self.get_timezones():
             # default time format: '14:04 8/25/2019'

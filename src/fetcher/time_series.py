@@ -4,7 +4,7 @@ from collections import namedtuple
 from datetime import timedelta
 from typing import Optional
 
-from src.time_utils import TimeUtils
+from src.utils.time_utils import TimeUtils
 
 
 class TimeSeries:
