@@ -1,6 +1,10 @@
 # weather-mqtt-bridge (Froggit WH2600)
 
-Collects provided information of a Froggit WH2600 weather station (local website) and push it to [MQTT](https://en.wikipedia.org/wiki/MQTT).
+Collects provided information of a Froggit WH2600 SE weather station (local website) and push's it to 
+[MQTT](https://en.wikipedia.org/wiki/MQTT).
+
+Supported are only the older "WH2600 SE" weather stations without a "PRO WIFI" suffix. These devices provide the data as HTML 
+(via embedded webserver). Tested only with firmware version 2.2.8 and 4.6.2. Other firmware versions may produce different HTML. 
 
 [MQTT](https://en.wikipedia.org/wiki/MQTT) is widely supported by the most smarthome systems.
 

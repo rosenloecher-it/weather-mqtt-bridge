@@ -92,7 +92,11 @@ class FetcherJob:
                 _logger.error('cannot load value (%s)!', item)
                 _logger.exception(ex)
 
-            values[item.result_key] = value
+            if value is not None:
+                if values.get(item.result_key) is None:
+                    values[item.result_key] = value
+                else:
+                    _logger.warning("alternative values exists (result key: '%s', html key: '%s')!", item.result_key, item.html_key)
 
         return values
 
@@ -101,13 +105,18 @@ class FetcherJob:
         results = {}
 
         for item in items:
-            try:
-                value = item.transform.transform(values)
-            except (TypeError, AttributeError):
-                value = None
-                _logger.error('cannot transform value (%s)!', item)
+            value = None
+            if values.get(item.result_key) is not None:
+                try:
+                    value = item.transform.transform(values)
+                except (TypeError, AttributeError):
+                    _logger.error('cannot transform value (%s)!', item)
 
-            results[item.result_key] = value
+                if value is not None:
+                    if results.get(item.result_key) is None:
+                        results[item.result_key] = value
+                    else:
+                        _logger.warning("alternative values exists (result key: '%s', html key: '%s')!", item.result_key, item.html_key)
 
         return results
 

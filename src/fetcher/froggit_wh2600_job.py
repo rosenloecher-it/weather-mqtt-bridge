@@ -45,10 +45,13 @@ class FroggitWh2600Job(FetcherJob):
         add_standard("outHumi", FetcherKey.HUMI_OUTSIDE, transformation.FloatTransformation)  # Outdoor Humidity
 
         add_standard("windir", FetcherKey.WIND_DIRECTION, transformation.FloatTransformation)  # Wind Direction
-        add_standard("windspeed", FetcherKey.WIND_SPEED, transformation.FloatTransformation)  # Wind Speed
+        # Wind Speed
+        # Firmware 2.2.8
+        add_standard("windspeed", FetcherKey.WIND_SPEED, transformation.FloatTransformation)
+        # Firmware 4.6.2 - overwrite possible former value
+        add_standard("avgwind", FetcherKey.WIND_SPEED, transformation.FloatTransformation)
 
         add_standard("solarrad", FetcherKey.SOLAR_RADIATION, transformation.FloatTransformation)  # Solar Radiation
-        add_standard("uv", FetcherKey.UV, transformation.FloatTransformation)  # UV
         add_standard("uvi", FetcherKey.UVI, transformation.FloatTransformation)  # UVI
 
         add_standard("rainofhourly", FetcherKey.RAIN_HOURLY, transformation.FloatTransformation)  # Hourly Rain Rate

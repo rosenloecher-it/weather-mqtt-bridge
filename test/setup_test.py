@@ -16,9 +16,9 @@ class SetupTest:
         return sample_time
 
     @classmethod
-    def load_froggit_mocked_html(cls) -> str:
+    def load_froggit_mocked_html(cls, file_name) -> str:
         curr_path = os.path.dirname(os.path.abspath(__file__))
-        test_path = os.path.join(curr_path, "fetcher", "froggit_livedata.html")
+        test_path = os.path.join(curr_path, "fetcher", file_name)
         with open(test_path) as file:
             data = file.read().replace('\n', '')
             return data
