@@ -12,7 +12,7 @@ Features:
 - Command line utils or runs as Linux service.
 - Send s JSON message, sample:
     ```json
-    {"battery-inside": "Normal", "battery-outside": "Normal", "humi-inside": 48.0, "humi-outside": 94.0, "pressure-abs": 980.3, "pressure-rel": 1011.8, "rain-counter": 0.3, "rain-hourly": 0.0, "solar-radiation": 64.01, "status": "success", "temp-inside": 22.1, "temp-outside": 1.2, "timestamp": "2022-01-08T10:56:00", "uv": 251.0, "uvi": 1.0, "wind-direction": 223.0, "wind-gust": 0.0, "wind-speed": 0.0}
+    {"batteryInside": "Normal", "batteryOutside": "Normal", "humiInside": 48.0, "humiOutside": 94.0, "pressureAbs": 980.3, "pressureRel": 1011.8, "rainCounter": 0.3, "rainHourly": 0.0, "solarRadiation": 64.01, "status": "success", "tempInside": 22.1, "tempOutside": 1.2, "timestamp": "2022-01-08T10:56:00", "uvi": 1.0, "windDirection": 223.0, "windGust": 0.0, "windSpeed": 0.0}
     ```
 - Calculates relative barometric pressure (strange results with the provided calculation)
 - An additional MQTT channel for service status may be configured, which shows if the service is running or not.

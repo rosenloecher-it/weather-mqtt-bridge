@@ -4,25 +4,24 @@ class FetcherKey:
     STATUS = "status"
     TIMESTAMP = "timestamp"
 
-    BATTERY_OUSIDE = "battery-outside"
-    BATTERY_INSIDE = "battery-inside"
+    BATTERY_OUSIDE = "batteryOutside"
+    BATTERY_INSIDE = "batteryInside"
 
-    TEMP_INSIDE = "temp-inside"
-    HUMI_INSIDE = "humi-inside"
+    TEMP_INSIDE = "tempInside"
+    HUMI_INSIDE = "humiInside"
 
-    TEMP_OUTSIDE = "temp-outside"
-    HUMI_OUTSIDE = "humi-outside"
+    TEMP_OUTSIDE = "tempOutside"
+    HUMI_OUTSIDE = "humiOutside"
 
-    PRESSURE_ABS = "pressure-abs"
-    PRESSURE_REL = "pressure-rel"
+    PRESSURE_ABS = "pressureAbs"
+    PRESSURE_REL = "pressureRel"
 
-    WIND_DIRECTION = "wind-direction"
-    WIND_GUST = "wind-gust"
-    WIND_SPEED = "wind-speed"
+    WIND_DIRECTION = "windDirection"
+    WIND_GUST = "windGust"
+    WIND_SPEED = "windSpeed"
 
-    SOLAR_RADIATION = "solar-radiation"
-    UV = "uv"
+    SOLAR_RADIATION = "solarRadiation"
     UVI = "uvi"
 
-    RAIN_HOURLY = "rain-hourly"
-    RAIN_COUNTER = "rain-counter"
+    RAIN_HOURLY = "rainHourly"
+    RAIN_COUNTER = "rainCounter"
