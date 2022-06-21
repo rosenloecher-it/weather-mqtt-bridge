@@ -79,7 +79,7 @@ class FetcherJob:
                 elements = soup.find_all(item.get_html_tag_name(), attrs=item.get_html_attr_filter())
                 count_elements = len(elements)
                 if count_elements != 1:
-                    _logger.error('expected one element, but got %d (%s)', count_elements, item)
+                    _logger.debug('expected one element, but got %d (%s)', count_elements, item)
                 else:
                     soup_element = elements[0]
                     if soup_element is None:
@@ -93,7 +93,8 @@ class FetcherJob:
                 _logger.exception(ex)
 
             if value is not None:
-                if values.get(item.result_key) is None:
+                existing_value = values.get(item.result_key)
+                if existing_value is None or existing_value == value:
                     values[item.result_key] = value
                 else:
                     _logger.warning("alternative values exists (result key: '%s', html key: '%s')!", item.result_key, item.html_key)
@@ -113,7 +114,8 @@ class FetcherJob:
                     _logger.error('cannot transform value (%s)!', item)
 
                 if value is not None:
-                    if results.get(item.result_key) is None:
+                    existing_value = results.get(item.result_key)
+                    if existing_value is None or existing_value == value:
                         results[item.result_key] = value
                     else:
                         _logger.warning("alternative values exists (result key: '%s', html key: '%s')!", item.result_key, item.html_key)
