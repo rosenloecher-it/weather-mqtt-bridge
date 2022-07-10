@@ -4,17 +4,20 @@ import logging
 import signal
 import threading
 from asyncio import Task
-from typing import Optional
+from collections import namedtuple
+from typing import Optional, List, Dict
 
 from src.fetcher.fetcher_factory import FetcherFactory
 from src.fetcher.fetcher_key import FetcherKey
-from src.fetcher.fetcher_result import FetcherStatus, FetcherResult
-from src.mqtt_client import MqttException
+from src.fetcher.fetcher_status import FetcherStatus
 from src.runner_config import RunnerConfKey
 from src.utils.json_utils import JsonUtils
 from src.utils.time_utils import TimeUtils
 
 _logger = logging.getLogger(__name__)
+
+
+Message = namedtuple('Message', ['topic', 'payload'])  # status: FetcherStatus, values: Dict[str, any]
 
 
 class Runner:
@@ -36,21 +39,20 @@ class Runner:
         default_fetch_timeout = max(self._refresh_time / 2, 30)
         self._fetch_timeout = runner_config.get(RunnerConfKey.FETCH_TIMEOUT, default_fetch_timeout)
 
-        self._payload_mqtt_last_will = runner_config.get(RunnerConfKey.PAYLOAD_MQTT_LAST_WILL)
-        self._payload_mqtt_topic = runner_config[RunnerConfKey.PAYLOAD_MQTT_TOPIC]
-        self._service_mqtt_running = runner_config.get(RunnerConfKey.SERVICE_MQTT_RUNNING)
-        self._service_mqtt_stopped = runner_config.get(RunnerConfKey.SERVICE_MQTT_STOPPED)  # == last will
-        self._service_mqtt_topic = runner_config.get(RunnerConfKey.SERVICE_MQTT_TOPIC)
+        self._payload_mqtt_last_will = runner_config.get(RunnerConfKey.MQTT_LAST_WILL)
+        self._payload_mqtt_inside_topic = runner_config.get(RunnerConfKey.MQTT_INSIDE_TOPIC)
+        self._payload_mqtt_outside_topic = runner_config.get(RunnerConfKey.MQTT_OUTSIDE_TOPIC)
 
         self._next_fetch_trigger = TimeUtils.now()
-        self._resilience_reference_time = TimeUtils.now()  # in combination with `self._resilience_time`
+        # self._resilience_reference_time = TimeUtils.now()  # in combination with `self._resilience_time`
 
         self._mqtt_client = mqtt_client
 
         if self._payload_mqtt_last_will:
-            self._mqtt_client.set_last_will(self._payload_mqtt_topic, self._payload_mqtt_last_will)
-        if self._service_mqtt_stopped and self._service_mqtt_topic:
-            self._mqtt_client.set_last_will(self._service_mqtt_topic, self._service_mqtt_stopped)
+            if self._payload_mqtt_inside_topic:
+                self._mqtt_client.set_last_will(self._payload_mqtt_inside_topic, self._payload_mqtt_last_will)
+            if self._payload_mqtt_outside_topic and self._payload_mqtt_outside_topic != self._payload_mqtt_inside_topic:
+                self._mqtt_client.set_last_will(self._payload_mqtt_outside_topic, self._payload_mqtt_last_will)
 
         self._mqtt_client.connect()
 
@@ -89,8 +91,6 @@ class Runner:
     async def _wait_for_mqtt_connection(self):
         while True:
             if self._mqtt_client.is_connected():
-                if self._service_mqtt_running and self._service_mqtt_topic:
-                    self._mqtt_client.publish(topic=self._service_mqtt_topic, payload=self._service_mqtt_running)
                 break
 
             await asyncio.sleep(0.1)
@@ -127,66 +127,102 @@ class Runner:
             return await asyncio.wait_for(self._fetch_data(), timeout or self._fetch_timeout)
         except asyncio.exceptions.TimeoutError:
             _logger.error("timeout (%.1fs) fetching data", timeout)
-            return FetcherResult(FetcherStatus.TIMEOUT, {})
+            return {FetcherKey.STATUS: FetcherStatus.TIMEOUT}
 
     async def _fetch_data(self):
         self._next_fetch_trigger = TimeUtils.now() + datetime.timedelta(seconds=self._refresh_time)
         _logger.debug("_fetch_data...")
 
         fetcher = self._fetcher_factory.create_fetcher_job()
-        fetch_result = fetcher.fetch_safe()
-        # await asyncio.sleep(1)  # 1.1
-        # result = FetcherResult(FetcherStatus.SUCCESS, {"reason": "better"})
-
-        return fetch_result
+        return fetcher.fetch_safe()
 
     def _handle_fetch_result(self):
         if not self._fetcher_task or not self._fetcher_task.done():
             return
 
-        fetcher_result = self._fetcher_task.result()
+        fetcher_values = self._fetcher_task.result()
         self._fetcher_task = None
         self._fetcher_started = None
 
-        _logger.debug("fetch_result: %s", fetcher_result)
+        _logger.debug("fetch_result: %s", fetcher_values)
 
-        fetcher_status = fetcher_result.status or FetcherStatus.ERROR
-        fetcher_values = fetcher_result.values or {}
+        messages = self.splitt_messages(
+            fetcher_values,
+            outside_topic=self._payload_mqtt_outside_topic,
+            inside_topic=self._payload_mqtt_inside_topic,
+        )
 
-        fetcher_values[FetcherKey.STATUS] = fetcher_status
-        if not fetcher_values.get(FetcherKey.TIMESTAMP):
-            fetcher_values[FetcherKey.TIMESTAMP] = TimeUtils.now().isoformat()
-
-        message = JsonUtils.dumps(fetcher_values)
-        within_resilience_period = (TimeUtils.now() - self._resilience_reference_time).total_seconds() <= self._resilience_time
-
-        sent_message_failure = False
-        try:
-            self._mqtt_client.publish(topic=self._payload_mqtt_topic, payload=message)
-        except MqttException:
-            if within_resilience_period:
-                _logger.error("MQTT publish failed. But errors within resilience period are tolerated!", exc_info=True)
-                sent_message_failure = True
-            else:
-                raise
-
-        if fetcher_status == FetcherStatus.OK and not sent_message_failure:
-            self._resilience_reference_time = TimeUtils.now()
-
-        if fetcher_status != FetcherStatus.OK:
-            if within_resilience_period:
-                _logger.warning("fetcher error (%s) within resilience period!", str(fetcher_result.status))
-            else:
-                raise RuntimeError(f"fetcher error ({fetcher_result.status}) => abort!")
+        for message in messages:
+            self._mqtt_client.publish(topic=message.topic, payload=message.payload)
 
     def close(self):
         if self._mqtt_client is not None:
             try:
                 if self._payload_mqtt_last_will:
-                    self._mqtt_client.publish(topic=self._payload_mqtt_topic, payload=self._payload_mqtt_last_will)
-                if self._service_mqtt_stopped and self._service_mqtt_topic:
-                    self._mqtt_client.publish(topic=self._service_mqtt_topic, payload=self._service_mqtt_stopped)
+                    if self._payload_mqtt_inside_topic:
+                        self._mqtt_client.publish(topic=self._payload_mqtt_inside_topic, payload=self._payload_mqtt_last_will)
+                    if self._payload_mqtt_outside_topic and self._payload_mqtt_inside_topic != self._payload_mqtt_outside_topic:
+                        self._mqtt_client.publish(topic=self._payload_mqtt_outside_topic, payload=self._payload_mqtt_last_will)
+
             except Exception as ex:
                 _logger.error("could not publish the final service messages! %s", ex)
 
             self._mqtt_client = None
+
+    @classmethod
+    def splitt_messages(cls, fetcher_values: Optional[Dict[str, any]], inside_topic: str, outside_topic: str) -> List[Message]:
+        messages = []
+
+        fetcher_values = {} if fetcher_values is None else fetcher_values
+
+        source_timestamp = fetcher_values.get(FetcherKey.TIMESTAMP) or TimeUtils.now().isoformat()
+        if isinstance(source_timestamp, datetime.datetime):
+            source_timestamp = source_timestamp.isoformat()
+
+        def append_value(values_out, key_in, key_out=None):
+            if key_out is None:
+                key_out = key_in
+            value = fetcher_values.get(key_in)
+            if value is not None:
+                values_out[key_out] = value
+
+        def add_meta(values_, sensor_name):
+            status = fetcher_values.get(FetcherKey.STATUS) or FetcherStatus.ERROR
+            if status == FetcherStatus.OK and not values_:
+                status = FetcherStatus.ERROR
+            values_[FetcherKey.STATUS] = status
+            values_[FetcherKey.TIMESTAMP] = source_timestamp
+            values_[FetcherKey.SENSOR] = sensor_name
+
+        if inside_topic:
+            values = {}
+            append_value(values, FetcherKey.BATTERY_INSIDE, FetcherKey.BATTERY)
+            append_value(values, FetcherKey.HUMI_INSIDE, FetcherKey.HUMI)
+            append_value(values, FetcherKey.TEMP_INSIDE, FetcherKey.TEMP)
+            add_meta(values, "inside1")
+
+            message = Message(inside_topic, JsonUtils.dumps(values))
+            messages.append(message)
+
+        if outside_topic:
+            values = {}
+            append_value(values, FetcherKey.PRESSURE_ABS)
+            append_value(values, FetcherKey.PRESSURE_REL)
+            append_value(values, FetcherKey.WIND_DIRECTION)
+            append_value(values, FetcherKey.WIND_GUST)
+            append_value(values, FetcherKey.WIND_SPEED)
+            append_value(values, FetcherKey.SOLAR_RADIATION)
+            append_value(values, FetcherKey.UVI)
+            append_value(values, FetcherKey.RAIN_HOURLY)
+            append_value(values, FetcherKey.RAIN_COUNTER)
+
+            append_value(values, FetcherKey.BATTERY_OUTSIDE, FetcherKey.BATTERY)
+            append_value(values, FetcherKey.HUMI_OUTSIDE, FetcherKey.HUMI)
+            append_value(values, FetcherKey.TEMP_OUTSIDE, FetcherKey.TEMP)
+
+            add_meta(values, "weatherStation")
+
+            message = Message(outside_topic, JsonUtils.dumps(values))
+            messages.append(message)
+
+        return messages

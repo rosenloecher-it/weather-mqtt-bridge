@@ -2,16 +2,21 @@
 class FetcherKey:
 
     STATUS = "status"
-    TIMESTAMP = "timestamp"
 
-    BATTERY_OUSIDE = "batteryOutside"
+    BATTERY = "battery"
     BATTERY_INSIDE = "batteryInside"
+    BATTERY_OUTSIDE = "batteryOutside"
 
-    TEMP_INSIDE = "tempInside"
+    HUMI = "humidity"
     HUMI_INSIDE = "humiInside"
-
-    TEMP_OUTSIDE = "tempOutside"
     HUMI_OUTSIDE = "humiOutside"
+
+    TEMP = "temperature"
+    TEMP_INSIDE = "tempInside"
+    TEMP_OUTSIDE = "tempOutside"
+
+    TIMESTAMP = "timestamp"
+    SENSOR = "sensor"
 
     PRESSURE_ABS = "pressureAbs"
     PRESSURE_REL = "pressureRel"

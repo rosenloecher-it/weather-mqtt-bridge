@@ -3,7 +3,6 @@ import unittest
 from unittest import mock
 
 from src.fetcher.fetcher_key import FetcherKey
-from src.fetcher.fetcher_result import FetcherStatus
 from src.fetcher.froggit_wh2600_job import FroggitWh2600Job
 from src.fetcher.time_series_manager import TimeSeriesManager
 from test.setup_test import SetupTest
@@ -26,7 +25,7 @@ class TestFroggitWh2600Job(unittest.TestCase):
 
     EXPECTED_VALUES = {
         FetcherKey.BATTERY_INSIDE: 'Normal',
-        FetcherKey.BATTERY_OUSIDE: 'Normal',
+        FetcherKey.BATTERY_OUTSIDE: 'Normal',
         FetcherKey.HUMI_INSIDE: 64.0,
         FetcherKey.HUMI_OUTSIDE: 43.0,
         FetcherKey.PRESSURE_ABS: 991.0,
@@ -34,6 +33,7 @@ class TestFroggitWh2600Job(unittest.TestCase):
         FetcherKey.RAIN_COUNTER: 0.0,
         FetcherKey.RAIN_HOURLY: 0.0,
         FetcherKey.SOLAR_RADIATION: 637.87,
+        FetcherKey.STATUS: "ok",
         FetcherKey.TEMP_INSIDE: 24.0,
         FetcherKey.TEMP_OUTSIDE: 31.3,
         FetcherKey.TIMESTAMP: "2019-08-25T14:04:00+02:00",
@@ -60,11 +60,8 @@ class TestFroggitWh2600Job(unittest.TestCase):
 
         mocked_now.return_value = froggit_test_time
 
-        test_result = fetcher.fetch()
-
-        self.assertEqual(test_result.status, FetcherStatus.OK)
-
-        self.assertEqual(self.EXPECTED_VALUES, test_result.values)
+        fetcher_values = fetcher.fetch()
+        self.assertEqual(self.EXPECTED_VALUES, fetcher_values)
 
     @mock.patch('src.utils.time_utils.TimeUtils.now')
     def test_firmware_v462(self, mocked_now):
@@ -83,8 +80,5 @@ class TestFroggitWh2600Job(unittest.TestCase):
 
         mocked_now.return_value = froggit_test_time
 
-        test_result = fetcher.fetch()
-
-        self.assertEqual(test_result.status, FetcherStatus.OK)
-
-        self.assertEqual(self.EXPECTED_VALUES, test_result.values)
+        fetcher_values = fetcher.fetch()
+        self.assertEqual(self.EXPECTED_VALUES, fetcher_values)

@@ -6,12 +6,9 @@ class RunnerConfKey:
     RESILIENCE_TIME = "resilience_time"
     FETCH_TIMEOUT = "fetch_timeout"
 
-    PAYLOAD_MQTT_TOPIC = "payload_mqtt_topic"
-    PAYLOAD_MQTT_LAST_WILL = "payload_mqtt_last_will"
-
-    SERVICE_MQTT_TOPIC = "service_mqtt_topic"
-    SERVICE_MQTT_RUNNING = "service_mqtt_running"
-    SERVICE_MQTT_STOPPED = "service_mqtt_stopped"
+    MQTT_OUTSIDE_TOPIC = "payload_mqtt_outside_topic"
+    MQTT_INSIDE_TOPIC = "payload_mqtt_inside_topic"
+    MQTT_LAST_WILL = "payload_mqtt_last_will"
 
 
 RUNNER_JSONSCHEMA = {
@@ -35,34 +32,22 @@ RUNNER_JSONSCHEMA = {
             "description": "Timeout to fetch data (seconds)."
         },
 
-        RunnerConfKey.PAYLOAD_MQTT_TOPIC: {
+        RunnerConfKey.MQTT_OUTSIDE_TOPIC: {
             "type": "string",
             "minLength": 1,
-            "description": "Payload (data) MQTT topic."
+            "description": "MQTT topic for outside weather station data"
         },
-        RunnerConfKey.PAYLOAD_MQTT_LAST_WILL: {
+        RunnerConfKey.MQTT_INSIDE_TOPIC: {
             "type": "string",
             "minLength": 1,
-            "description": "Payload (data) MQTT last will (leave empty to not set a las will)."
+            "description": "MQTT topic for inside sensor data."
         },
-
-        RunnerConfKey.SERVICE_MQTT_TOPIC: {
+        RunnerConfKey.MQTT_LAST_WILL: {
             "type": "string",
             "minLength": 1,
-            "description": "Service (running/stopped) MQTT topic."
-        },
-        RunnerConfKey.SERVICE_MQTT_RUNNING: {
-            "type": "string",
-            "minLength": 1,
-            "description": "Service (running/stopped) MQTT message, which is sent, when the service is started (running)."
-        },
-        RunnerConfKey.SERVICE_MQTT_STOPPED: {
-            "type": "string",
-            "minLength": 1,
-            "description": "Service (running/stopped) MQTT message, which is sent, when the service is stopped (used as last will!)."
+            "description": "MQTT last will (leave empty to not set a las will)."
         },
 
     },
     "additionalProperties": False,
-    "required": [RunnerConfKey.PAYLOAD_MQTT_TOPIC],
 }

@@ -10,10 +10,18 @@ Supported are only the older "WH2600 SE" weather stations without a "PRO WIFI" s
 
 Features:
 - Command line utils or runs as Linux service.
-- Send s JSON message, sample:
+- Sends JSON messages for inside and outside sensor, samples:
     ```json
-    {"batteryInside": "Normal", "batteryOutside": "Normal", "humiInside": 48.0, "humiOutside": 94.0, "pressureAbs": 980.3, "pressureRel": 1011.8, "rainCounter": 0.3, "rainHourly": 0.0, "solarRadiation": 64.01, "status": "success", "tempInside": 22.1, "tempOutside": 1.2, "timestamp": "2022-01-08T10:56:00", "uvi": 1.0, "windDirection": 223.0, "windGust": 0.0, "windSpeed": 0.0}
+    {
+      "battery": "Normal", "humidity": 64.0, "pressureAbs": 991.2, "pressureRel": 1021.5, "rainCounter": 175.6, "rainHourly": 0.0, 
+      "sensor": "weatherStation", "solarRadiation": 153.84, "status": "ok", "temperature": 15.1, "timestamp": "2022-01-08T10:56:00", 
+      "uvi": 2.0, "windDirection": 322.0, "windGust": 11.2, "windSpeed": 7.2
+    }
     ```
+    ```json
+    {"battery": "Normal", "humidity": 52.0, "sensor": "inside1", "status": "ok", "temperature": 22.5, "timestamp": "2022-01-08T10:56:00"}
+    ```
+
 - Calculates relative barometric pressure (strange results with the provided calculation)
 - An additional MQTT channel for service status may be configured, which shows if the service is running or not.
   There were issues, that the weather station did not respond after some time and had to be restarted.
@@ -38,7 +46,7 @@ source ./venv/bin/activate
 python --version
 
 # install required packages
-pip install -r requirements.txt
+pip install --upgrade -r requirements.txt
 ```
 
 ### Configuration

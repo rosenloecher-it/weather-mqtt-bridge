@@ -9,7 +9,8 @@ from bs4 import BeautifulSoup
 
 from src.fetcher.fetcher_config import FetcherConfKey
 from src.fetcher.fetcher_item import FetcherItem
-from src.fetcher.fetcher_result import FetcherResult, FetcherStatus
+from src.fetcher.fetcher_key import FetcherKey
+from src.fetcher.fetcher_status import FetcherStatus
 from src.fetcher.time_series_manager import TimeSeriesManager
 
 _logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class FetcherJob:
             return self.fetch()
         except Exception as ex:
             _logger.exception(ex)
-            return FetcherResult(FetcherStatus.ERROR, {})
+            return {FetcherKey.STATUS: FetcherStatus.ERROR}
 
     def fetch(self):
         _logger.debug("fetching %s", self._url)
@@ -54,8 +55,8 @@ class FetcherJob:
         values_transformed = self._transform_values(items, values_raw)
         values_over_time = self._calculated_timed_values(items, values_transformed)
 
-        result = FetcherResult(FetcherStatus.OK, values_over_time)
-        return result
+        values_over_time[FetcherKey.STATUS] = FetcherStatus.OK
+        return values_over_time
 
     def _load_page(self) -> str:
         try:

@@ -33,7 +33,7 @@ class FroggitWh2600Job(FetcherJob):
         )
         fetcher_items.append(item)
 
-        add_standard("outBattSta1", FetcherKey.BATTERY_OUSIDE, transformation.StringTransformation)  # Outdoor Sensor ID and Battery
+        add_standard("outBattSta1", FetcherKey.BATTERY_OUTSIDE, transformation.StringTransformation)  # Outdoor Sensor ID and Battery
         add_standard("inBattSta", FetcherKey.BATTERY_INSIDE, transformation.StringTransformation)  # Indoor Sensor ID and Battery
 
         add_standard("inTemp", FetcherKey.TEMP_INSIDE, transformation.FloatTransformation)  # Indoor Temperature
