@@ -59,6 +59,19 @@ class StringTransformation(SingleTransformation):
         return value
 
 
+class BatteryTransformation(StringTransformation):
+
+    def __init__(self, value_key, trim=True):
+        super().__init__(value_key)
+        self._trim = trim
+
+    def transform(self, raw_values: Dict[str, str]) -> str:
+        value = super().transform(raw_values)
+        if value in ["- -", "-", "--", "---"]:
+            value = None
+        return value
+
+
 class TimeTransformation(SingleTransformation):  # noqa
 
     DEFAULT_TIME_FORMAT = '%H:%M %m/%d/%Y'  # '14:04 8/25/2019'
