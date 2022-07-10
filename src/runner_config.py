@@ -6,9 +6,9 @@ class RunnerConfKey:
     RESILIENCE_TIME = "resilience_time"
     FETCH_TIMEOUT = "fetch_timeout"
 
-    MQTT_OUTSIDE_TOPIC = "payload_mqtt_outside_topic"
-    MQTT_INSIDE_TOPIC = "payload_mqtt_inside_topic"
-    MQTT_LAST_WILL = "payload_mqtt_last_will"
+    MQTT_OUTSIDE_TOPIC = "mqtt_outside_topic"
+    MQTT_INSIDE_TOPIC = "mqtt_inside_topic"
+    MQTT_LAST_WILL = "mqtt_last_will"
 
 
 RUNNER_JSONSCHEMA = {
