@@ -29,7 +29,16 @@ Features:
 
 ## Startup
 
+### Prerequisites
+
+Python 3 ...
+
+```bash
+sudo apt-get install python3-dev python3-pip python3-venv python3-wheel -y
+```
+
 ### Prepare python environment
+
 ```bash
 cd /opt
 sudo mkdir weather-mqtt-bridge
@@ -37,7 +46,7 @@ sudo chown <user>:<user> weather-mqtt-bridge  # type in your user
 git clone https://github.com/rosenloecher-it/weather-mqtt-bridge weather-mqtt-bridge
 
 cd weather-mqtt-bridge
-virtualenv -p /usr/bin/python3 venv
+python3 -m venv venv
 
 # activate venv
 source ./venv/bin/activate
@@ -47,6 +56,7 @@ python --version
 
 # install required packages
 pip install --upgrade -r requirements.txt
+# or: pip install --upgrade -r requirements-dev.txt
 ```
 
 ### Configuration
